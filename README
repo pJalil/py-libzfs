@@ -1,3 +1,3 @@
 Build 
 
-gcc -fPIC -shared -o clibzfs.so libzfs.c -lzfs
+gcc -fPIC -shared -o ilibzfs.so ilibzfs.c -lzfs
