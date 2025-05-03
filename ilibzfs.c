@@ -34,6 +34,12 @@
  * ex: rpool/data/test
  */
 
+//In theory the limit should be arround 2^64, adapt to your needs.
+#define MAX_DATASETS 1024  
+
+static char *dataset_list[MAX_DATASETS];
+static int dataset_count = 0;
+
 int create_dataset(const char *dataset, const char *mountpoint, const char *compression) {
 	libzfs_handle_t *g_zfs; 
         nvlist_t *props;
@@ -89,4 +95,55 @@ int destroy_dataset(const char *dataset) {
 	libzfs_fini(g_zfs);
 
 	return 0;
+}
+
+// callback function internal to ilibzfs
+int collect_dataset(zfs_handle_t *zhp, void *unused) {
+    	if (dataset_count >= MAX_DATASETS) {
+        	zfs_close(zhp);
+        	return -5; 
+    	}
+
+    	const char *name = zfs_get_name(zhp);
+    	dataset_list[dataset_count] = strdup(name);
+    	dataset_count++;
+
+    	zfs_iter_filesystems(zhp, collect_dataset, NULL);
+    	zfs_close(zhp);
+    	return 0;
+}
+
+
+char **get_all_datasets() {
+    	libzfs_handle_t *g_zfs = libzfs_init();
+    	if (!g_zfs) return NULL;
+
+    	dataset_count = 0;
+    	memset(dataset_list, 0, sizeof(dataset_list));
+
+    	zfs_iter_root(g_zfs, collect_dataset, NULL);
+
+    	libzfs_fini(g_zfs);
+    	return dataset_list;
+}
+
+char **get_children_datasets(const char *dataset) {
+    	libzfs_handle_t *g_zfs = libzfs_init();
+    	if (!g_zfs) return NULL;
+
+	zfs_handle_t *zhp;
+
+	zhp = zfs_open(g_zfs, dataset, ZFS_TYPE_DATASET);
+	if (!zhp) {
+		libzfs_fini(g_zfs);
+		return NULL;
+	}
+
+    	dataset_count = 0;
+    	memset(dataset_list, 0, sizeof(dataset_list));
+
+    	zfs_iter_filesystems(zhp, collect_dataset, NULL);
+
+    	libzfs_fini(g_zfs);
+    	return dataset_list;
 }

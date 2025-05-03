@@ -1,3 +1,5 @@
 Build 
 
 gcc -fPIC -shared -o ilibzfs.so ilibzfs.c -lzfs
+
+Tested on OmniOS r151052, built with GCC 14.

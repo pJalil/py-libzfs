@@ -26,16 +26,14 @@
 
 import ctypes
 
-clibzfs = ctypes.CDLL("./ilibzfs.so")  # change according to path
+ilibzfs = ctypes.CDLL("./ilibzfs.so")  # change according to path
 
-clibzfs.create_dataset.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p]
-clibzfs.create_dataset.restype = ctypes.c_int
-
-clibzfs.destroy_dataset.argtype = ctypes.c_char_p
-clibzfs.destroy_dataset.restype = ctypes.c_int
+# dataset creation
+ilibzfs.create_dataset.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p]
+ilibzfs.create_dataset.restype = ctypes.c_int
 
 def create_dataset(dataset, mountpoint, compression):
-    result = clibzfs.create_dataset(
+    result = ilibzfs.create_dataset(
         dataset.encode(),
         mountpoint.encode(),
         compression.encode()
@@ -45,16 +43,47 @@ def create_dataset(dataset, mountpoint, compression):
     else:
         return f"Error code: {result}"
 
+#dataset destruction
+ilibzfs.destroy_dataset.argtype = ctypes.c_char_p
+ilibzfs.destroy_dataset.restype = ctypes.c_int
+
 def destroy_dataset(dataset):
-    result = clibzfs.destroy_dataset(dataset.encode())
+    result = ilibzfs.destroy_dataset(dataset.encode())
     
     if result == 0:
         return "success"
     else:
         return f"Error code: {result}"
 
+ilibzfs.get_all_datasets.restype = ctypes.POINTER(ctypes.c_char_p)
+
+def get_all_datasets():
+    ptr = ilibzfs.get_all_datasets()
+    result = []
+    i = 0
+    while ptr[i]:
+        result.append(ptr[i].decode())
+        i += 1
+    return result
+
+ilibzfs.get_children_datasets.argtype = ctypes.c_char_p
+ilibzfs.get_children_datasets.restype = ctypes.POINTER(ctypes.c_char_p)
+
+def get_children_datasets(dataset):
+    ptr = ilibzfs.get_children_datasets(dataset.encode())
+    result = []
+    i = 0
+    while ptr[i]:
+        result.append(ptr[i].decode())
+        i += 1
+    return result
+
 # Test
 if __name__ == "__main__":
     print(create_dataset("rpool/mydata", "/data/mydata", "lz4"))
+    print(create_dataset("rpool/mydata/datamy", "/data/mydata/datamy", "lz4"))
+    print(get_all_datasets())
+    print(get_children_datasets("rpool/mydata"))
+    print(destroy_dataset("rpool/mydata/datamy"))
     print(destroy_dataset("rpool/mydata"))
 
