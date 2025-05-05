@@ -23,67 +23,71 @@
 
 """
 
-
 import ctypes
 
 py_libzfs = ctypes.CDLL("/opt/py-libzfs/lib/py-libzfs.so")
 
-# dataset creation
-py_libzfs.create_dataset.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p]
+py_libzfs.create_dataset.argtypes = [
+        ctypes.c_char_p, 
+        ctypes.POINTER(ctypes.c_char_p), 
+        ctypes.POINTER(ctypes.c_char_p), 
+        ctypes.c_int
+ ]
 py_libzfs.create_dataset.restype = ctypes.c_int
 
-def create_dataset(dataset, mountpoint, compression):
-    result = py_libzfs.create_dataset(
-        dataset.encode(),
-        mountpoint.encode(),
-        compression.encode()
-    )
-    if result == 0:
-        return "success"
-    else:
-        return f"Error code: {result}"
-
-#dataset destruction
 py_libzfs.destroy_dataset.argtype = ctypes.c_char_p
 py_libzfs.destroy_dataset.restype = ctypes.c_int
 
-def destroy_dataset(dataset):
-    result = py_libzfs.destroy_dataset(dataset.encode())
-    
-    if result == 0:
-        return "success"
-    else:
-        return f"Error code: {result}"
-
 py_libzfs.get_all_datasets.restype = ctypes.POINTER(ctypes.c_char_p)
-
-def get_all_datasets():
-    ptr = py_libzfs.get_all_datasets()
-    result = []
-    i = 0
-    while ptr[i]:
-        result.append(ptr[i].decode())
-        i += 1
-    return result
 
 py_libzfs.get_children_datasets.argtype = ctypes.c_char_p
 py_libzfs.get_children_datasets.restype = ctypes.POINTER(ctypes.c_char_p)
 
-def get_children_datasets(dataset):
-    ptr = py_libzfs.get_children_datasets(dataset.encode())
-    result = []
-    i = 0
-    while ptr[i]:
-        result.append(ptr[i].decode())
-        i += 1
-    return result
 
-# Test
-def test():
-    print(create_dataset("rpool/mydata", "/data/mydata", "lz4"))
-    print(create_dataset("rpool/mydata/datamy", "/data/mydata/datamy", "lz4"))
-    print(get_all_datasets())
-    print(get_children_datasets("rpool/mydata"))
-    print(destroy_dataset("rpool/mydata/datamy"))
-    print(destroy_dataset("rpool/mydata"))
+class Datasets:
+    def __init__(self, name):
+        self.name = name
 
+    def create(dataset: str, props: dict) -> int:
+        count = len(props)
+
+        keys_list = [key.encode("utf-8") for key in props.keys()]
+        values_list = [value.encode("utf-8") for value in props.values()]
+
+        keys_array = (ctypes.c_char_p * count)(*keys_list)
+        values_array = (ctypes.c_char_p * count)(*values_list)
+    
+        result = py_libzfs.create_dataset(
+            dataset.encode("utf-8"),
+            keys_array,
+            values_array,
+            count
+        )
+
+        return result
+
+    def destroy(dataset: str) -> int:
+        result = py_libzfs.destroy_dataset(dataset.encode())
+    
+        return result
+
+    def get_all() -> list:
+        ptr = py_libzfs.get_all_datasets()
+        result = []
+        i = 0
+        while ptr[i]:
+            result.append(ptr[i].decode())
+            i += 1
+        return result
+
+    def get_children(dataset) -> list:
+        ptr = py_libzfs.get_children_datasets(dataset.encode())
+        result = []
+        i = 0
+        while ptr[i]:
+            result.append(ptr[i].decode())
+            i += 1
+        return result
+
+    def __repr__(self):
+        return f"<Dataset '{self.name}'>"
