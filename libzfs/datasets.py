@@ -38,6 +38,14 @@ py_libzfs.create_dataset.restype = ctypes.c_int
 py_libzfs.destroy_dataset.argtype = ctypes.c_char_p
 py_libzfs.destroy_dataset.restype = ctypes.c_int
 
+py_libzfs.edit_dataset.argtypes = [
+        ctypes.c_char_p, 
+        ctypes.POINTER(ctypes.c_char_p), 
+        ctypes.POINTER(ctypes.c_char_p), 
+        ctypes.c_int
+ ]
+py_libzfs.edit_dataset.restype = ctypes.c_int
+
 py_libzfs.get_all_datasets.restype = ctypes.POINTER(ctypes.c_char_p)
 
 py_libzfs.get_children_datasets.argtype = ctypes.c_char_p
@@ -69,6 +77,24 @@ class Datasets:
     def destroy(dataset: str) -> int:
         result = py_libzfs.destroy_dataset(dataset.encode())
     
+        return result
+
+    def edit(dataset: str, props: dict) -> int:
+        count = len(props)
+
+        keys_list = [key.encode("utf-8") for key in props.keys()]
+        values_list = [value.encode("utf-8") for value in props.values()]
+
+        keys_array = (ctypes.c_char_p * count)(*keys_list)
+        values_array = (ctypes.c_char_p * count)(*values_list)
+    
+        result = py_libzfs.edit_dataset(
+            dataset.encode("utf-8"),
+            keys_array,
+            values_array,
+            count
+        )
+
         return result
 
     def get_all() -> list:

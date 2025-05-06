@@ -6,6 +6,7 @@
 
 int create_dataset(const char *dataset, const char **keys, const char **values, int count);
 int destroy_dataset(const char *dataset);
+int edit_dataset(const char *dataset, const char **keys, const char **values, int count);
 char **get_all_datasets(void);
 char **get_children_datasets(const char *dataset);
 

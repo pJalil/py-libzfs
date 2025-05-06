@@ -98,6 +98,48 @@ int destroy_dataset(const char *dataset) {
 	return 0;
 }
 
+int edit_dataset(const char *dataset, const char **keys, const char **values, int count) {
+	zfs_handle_t *zhp;
+	libzfs_handle_t *g_zfs;
+	nvlist_t *props;
+
+        g_zfs = libzfs_init();
+        if (!g_zfs) {
+        	return -1;
+	}	
+
+	zhp = zfs_open(g_zfs, dataset, ZFS_TYPE_DATASET);
+	if (!zhp) {
+		zfs_close(zhp);
+		libzfs_fini(g_zfs);
+		return -4;
+	}
+
+        if (nvlist_alloc(&props, NV_UNIQUE_NAME, 0) != 0) {
+                libzfs_fini(g_zfs);
+
+                return -2;
+        }
+
+    	for (int i = 0; i < count; ++i) {
+        	if (keys[i] && values[i]) {
+            		if (nvlist_add_string(props, keys[i], values[i]) != 0) {
+                		nvlist_free(props);
+                		libzfs_fini(g_zfs);
+                		return -3;
+            		}
+        	}
+   	}
+	
+	int ret = zfs_prop_set_list(zhp, props);
+
+    	nvlist_free(props);
+	zfs_close(zhp);
+	libzfs_fini(g_zfs);
+
+    	return ret;
+}	
+
 // callback function internal to ilibzfs
 int collect_dataset(zfs_handle_t *zhp, void *unused) {
     	if (dataset_count >= MAX_DATASETS) {
