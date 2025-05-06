@@ -15,8 +15,8 @@ $(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 install: $(TARGET)
-	mkdir -p $(PREFIX)/lib
-	cp $(TARGET) $(PREFIX)/lib/
+	mkdir -p $(PREFIX)/
+	cp $(TARGET) $(PREFIX)/
 
 clean:
 	rm -f $(OBJ) $(TARGET)

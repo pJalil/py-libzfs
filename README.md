@@ -19,6 +19,6 @@ To uninstall, run:
 make uninstall
 ```
 
-*Because of the installation paths (/usr/lib/python3.12/site-packages for python files and /opt/py-libzfs for the C interface), you should be using pfexec or sudo, or set permissions to write and read from theses directory for your current user.*
+*Because of the installation paths (/usr/lib/python3.12/site-packages for python files and /usr/lib/py-libzfs for the C interface), you should be using pfexec or sudo, or set permissions to write and read from theses directory for your current user.*
 
 Tested on OmniOS r151052, built with GCC 14 and using Python 3.12.

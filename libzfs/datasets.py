@@ -25,7 +25,7 @@
 
 import ctypes
 
-py_libzfs = ctypes.CDLL("/opt/py-libzfs/lib/py-libzfs.so")
+py_libzfs = ctypes.CDLL("/usr/lib/py-libzfs/py-libzfs.so")
 
 py_libzfs.create_dataset.argtypes = [
         ctypes.c_char_p, 
