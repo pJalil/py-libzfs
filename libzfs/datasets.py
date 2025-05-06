@@ -1,6 +1,6 @@
 """
 
- * pylibzfs
+ * py-libzfs
  * Copyright (C) 2025 Jalil HESSANE
 
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
