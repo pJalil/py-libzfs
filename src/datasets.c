@@ -81,6 +81,7 @@ int destroy_dataset(const char *dataset) {
 
 	zhp = zfs_open(g_zfs, dataset, ZFS_TYPE_DATASET);
 	if (!zhp) {
+		fprintf(stderr, "ZFS error: %s\n", libzfs_error_description(g_zfs));
 		libzfs_fini(g_zfs);
 		return -4;
 	}

@@ -74,11 +74,6 @@ class Datasets:
 
         return result
 
-    def destroy(dataset: str) -> int:
-        result = py_libzfs.destroy_dataset(dataset.encode())
-    
-        return result
-
     def edit(dataset: str, props: dict) -> int:
         count = len(props)
 
@@ -113,6 +108,20 @@ class Datasets:
         while ptr[i]:
             result.append(ptr[i].decode())
             i += 1
+        return result
+
+    # If used with True, it will destroy all children datasets. Use at your own risk
+    def destroy(dataset: str, force=False) -> int:
+        if force==False:
+            result = py_libzfs.destroy_dataset(dataset.encode())
+        elif force==True:
+            children = Datasets.get_children(dataset)
+            for i in range(len(children)-1,-1,-1):
+                py_libzfs.destroy_dataset(children[i].encode())
+            result = py_libzfs.destroy_dataset(dataset.encode())
+        else:
+            result=-10
+
         return result
 
     def __repr__(self):
