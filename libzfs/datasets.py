@@ -27,6 +27,7 @@ import ctypes
 
 py_libzfs = ctypes.CDLL("/usr/lib/py-libzfs/py-libzfs.so")
 
+#Dataset creation
 py_libzfs.create_dataset.argtypes = [
         ctypes.c_char_p, 
         ctypes.POINTER(ctypes.c_char_p), 
@@ -35,9 +36,15 @@ py_libzfs.create_dataset.argtypes = [
  ]
 py_libzfs.create_dataset.restype = ctypes.c_int
 
+#Dataset destruction
 py_libzfs.destroy_dataset.argtype = ctypes.c_char_p
 py_libzfs.destroy_dataset.restype = ctypes.c_int
 
+#Dataset's props
+py_libzfs.get_dataset_prop.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+py_libzfs.get_dataset_prop.restype = ctypes.c_char_p
+
+#Dataset edition
 py_libzfs.edit_dataset.argtypes = [
         ctypes.c_char_p, 
         ctypes.POINTER(ctypes.c_char_p), 
@@ -46,8 +53,10 @@ py_libzfs.edit_dataset.argtypes = [
  ]
 py_libzfs.edit_dataset.restype = ctypes.c_int
 
+#Dataset listing
 py_libzfs.get_all_datasets.restype = ctypes.POINTER(ctypes.c_char_p)
 
+#Dataset's children listing
 py_libzfs.get_children_datasets.argtype = ctypes.c_char_p
 py_libzfs.get_children_datasets.restype = ctypes.POINTER(ctypes.c_char_p)
 
@@ -91,6 +100,12 @@ class Datasets:
         )
 
         return result
+
+    def get_prop(dataset: str, prop: str) -> str:
+        result = py_libzfs.get_dataset_prop(dataset.encode(), prop.encode())
+        if not result:
+            raise RuntimeError(f"Failed to get prop {prop}")
+        return result.decode()
 
     def get_all() -> list:
         ptr = py_libzfs.get_all_datasets()

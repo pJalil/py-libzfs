@@ -99,6 +99,38 @@ int destroy_dataset(const char *dataset) {
 	return 0;
 }
 
+
+const char *get_dataset_prop(const char *dataset, const char *prop_name) {
+    static char propval[1024];
+    libzfs_handle_t *g_zfs = libzfs_init();
+    if (!g_zfs) return NULL;
+
+    zfs_handle_t *zhp = zfs_open(g_zfs, dataset, ZFS_TYPE_DATASET);
+    if (!zhp) {
+        libzfs_fini(g_zfs);
+        return NULL;
+    }
+
+    zfs_prop_t prop = zfs_name_to_prop(prop_name);
+    if (prop == ZPROP_INVAL) {
+        // Propriété invalide ou non standard
+        zfs_close(zhp);
+        libzfs_fini(g_zfs);
+        return NULL;
+    }
+
+    zprop_source_t src;
+    if (zfs_prop_get(zhp, prop, propval, sizeof(propval), &src, NULL, 0, B_FALSE) != 0) {
+        zfs_close(zhp);
+        libzfs_fini(g_zfs);
+        return NULL;
+    }
+
+    zfs_close(zhp);
+    libzfs_fini(g_zfs);
+    return propval;
+}
+
 int edit_dataset(const char *dataset, const char **keys, const char **values, int count) {
 	zfs_handle_t *zhp;
 	libzfs_handle_t *g_zfs;
