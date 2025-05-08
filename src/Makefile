@@ -1,5 +1,5 @@
 # py-libzfs 
-# Copyright (C) 2025 Jalil HESANE
+# Copyright (C) 2025 Jalil HESSANE
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@ CC = gcc
 CFLAGS = -Wall -fPIC -I.
 LDFLAGS = -shared -lzfs
 
-SRC = py-libzfs.c datasets.c
+SRC = py-libzfs.c datasets.c snapshots.c
 OBJ = $(SRC:.c=.o)
 TARGET = py-libzfs.so
 

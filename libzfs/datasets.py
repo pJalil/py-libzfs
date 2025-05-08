@@ -140,4 +140,4 @@ class Datasets:
         return result
 
     def __repr__(self):
-        return f"<Dataset '{self.name}'>"
+        return f"<Datasets '{self.name}'>"

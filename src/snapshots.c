@@ -21,18 +21,47 @@
  * SOFTWARE.
  */
 
-#ifndef DATASETS_H
-#define DATASETS_H
+#include <libzfs.h>
+#include <stdio.h>
+#include <string.h>
 
-//In theory the limit should be arround 2^64, adapt to your needs.
-#define MAX_DATASETS 1024  
-#define MAX_PROPS 1024  
+int create_snapshot(const char *snapshot, boolean_t recursive) {
+	libzfs_handle_t *g_zfs = libzfs_init();
+	
+	int ret =zfs_snapshot(g_zfs, snapshot, recursive, NULL);
+	libzfs_fini(g_zfs);
+	
+	return ret;
+}
 
-int create_dataset(const char *dataset, const char **keys, const char **values, int count);
-int destroy_dataset(const char *dataset);
-const char *get_dataset_prop(const char *dataset, const char *prop_name);
-int edit_dataset(const char *dataset, const char **keys, const char **values, int count);
-char **get_all_datasets(void);
-char **get_children_datasets(const char *dataset);
+int destroy_snapshot(const char *snapshot) {
+	libzfs_handle_t *g_zfs = libzfs_init();
+	if (!g_zfs)
+	return -1;
 
-#endif // DATASETS_H
+	char snapshot_buf[1024];
+    	strncpy(snapshot_buf, snapshot, sizeof(snapshot_buf));
+	snapshot_buf[sizeof(snapshot_buf) - 1] = '\0';
+
+	char *at = strchr(snapshot_buf, '@');
+		if (!at) {
+	        libzfs_fini(g_zfs);
+	        return -11;
+        }
+
+	*at = '\0';
+        const char *dataset = snapshot_buf;
+	const char *snapname = at + 1;
+
+	zfs_handle_t *zhp = zfs_open(g_zfs, dataset, ZFS_TYPE_DATASET);
+	if (!zhp) {
+	        libzfs_fini(g_zfs);
+	        return -3;
+	}
+
+	int ret = zfs_destroy_snaps(zhp, (char *)snapname, B_FALSE);
+	zfs_close(zhp);
+	libzfs_fini(g_zfs);
+
+	return ret;
+}

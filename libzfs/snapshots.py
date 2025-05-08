@@ -23,5 +23,27 @@
 
 """
 
-from .datasets import Datasets
-from .snapshots import Snapshots
+import ctypes
+
+py_libzfs = ctypes.CDLL("/usr/lib/py-libzfs/py-libzfs.so")
+
+# Snapshot creation
+py_libzfs.create_snapshot.argtypes = [ctypes.c_char_p, ctypes.c_bool]
+py_libzfs.create_snapshot.restype = ctypes.c_int
+
+# Snapshot destruction
+py_libzfs.destroy_snapshot.argtype = ctypes.c_char_p
+py_libzfs.destroy_snapshot.restype = ctypes.c_int
+
+class Snapshots:
+    def __init__(self, name):
+        self.name = name
+
+    def create(snapshot: str, recursive: bool = False) -> int:
+        return py_libzfs.create_snapshot(snapshot.encode(), recursive)
+
+    def destroy(snapshot: str) -> int:
+        return py_libzfs.destroy_snapshot(snapshot.encode())
+        
+    def __repr__(self):
+        return f"<Snapshots '{self.name}'>"

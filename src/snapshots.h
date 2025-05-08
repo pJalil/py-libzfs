@@ -21,18 +21,12 @@
  * SOFTWARE.
  */
 
-#ifndef DATASETS_H
-#define DATASETS_H
+#ifndef SNAPSHOTS_H
+#define SNAPSHOTS_H
 
-//In theory the limit should be arround 2^64, adapt to your needs.
-#define MAX_DATASETS 1024  
-#define MAX_PROPS 1024  
+#include <libzfs.h>
 
-int create_dataset(const char *dataset, const char **keys, const char **values, int count);
-int destroy_dataset(const char *dataset);
-const char *get_dataset_prop(const char *dataset, const char *prop_name);
-int edit_dataset(const char *dataset, const char **keys, const char **values, int count);
-char **get_all_datasets(void);
-char **get_children_datasets(const char *dataset);
+int create_snapshot(const char *dataset, boolean_t recursive);
+int destroy_snapshot(const char *snapshot);
 
-#endif // DATASETS_H
+#endif // SNAPSHOTS_H

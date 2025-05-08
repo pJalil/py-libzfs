@@ -173,7 +173,7 @@ int edit_dataset(const char *dataset, const char **keys, const char **values, in
     	return ret;
 }	
 
-// callback function internal to ilibzfs
+// callback function internal to py-libzfs
 int collect_dataset(zfs_handle_t *zhp, void *unused) {
     	if (dataset_count >= MAX_DATASETS) {
         	zfs_close(zhp);
